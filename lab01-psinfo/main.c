@@ -2,16 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main(int argc, char* argv[]){
+int printProcessInfo(char pid[]){
     // Variable para el inicio del comando
     char inicio_comando[50] = "cat /proc/";
     // Concatenamos el inicio del comando con el primer argumento, que sería el pid
-    strcat(inicio_comando, argv[1]);
+    strcat(inicio_comando, pid);
     // Concatenamos con /status para que el programa imprima la información de estado del proceso
     // El comando queda como: cat /proc/123/status
     // Siendo 123 un ejemplo de pid
     strcat(inicio_comando, "/status");
-
     // Declaramos un buffer para leer cada línea del archivo que retorne la función popen. 128 porque es lo máximo que ocupa una línea. 
     char buffer[128];
 
@@ -24,7 +23,6 @@ int main(int argc, char* argv[]){
         // Retorna 1 para salir
         return 1;
     }
-    
     // Fgets ayuda a abrir un pipe del archivo fp y guardar línea por línea en el buffer que definimos anteriormente
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
         if (strncmp("Name:", buffer, 5) == 0) {
@@ -45,10 +43,16 @@ int main(int argc, char* argv[]){
             printf("# de cambios de contexto no voluntarios: %s", buffer + 28);
         }
     }
-    
     // Se cierra el pipe para ahorrar recursos. 
     pclose(fp);
+    printf("------------------------------------------------------------------------\n");
     return 0;
+}
 
+int main(int argc, char* argv[]){
+    for(int i=1; i<argc; i++){
+        printProcessInfo(argv[i]);
+    }
+    return 0;
 }
 
