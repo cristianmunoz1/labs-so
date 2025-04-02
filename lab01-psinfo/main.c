@@ -77,12 +77,50 @@ void printProcessQueue(struct Node* head){
     }
 }
 
-int main(int argc, char* argv[]){
-    struct Node* queue = NULL;
-    for(int i=1; i<argc; i++){
-        storeProcessInfo(argv[i], &queue);
+// Función para validar que se pase el -l como parámetro cuando se ingresen varios pids
+int processPIDs(int argc, char* argv[], struct Node** queue){
+    
+    //Si pasa solo un argumento significa que no pasó ningún pid, por lo que se le advierte al usuario
+    if (argc < 2){
+        printf("Por favor, ingresa al menos un Process id. \n");
     }
 
+    // si el primer argumento coincide con -l entonces continuamos con la lectura de argumentos
+    if (strcmp(argv[1], "-l") == 0) {
+        // Si el nro de argumentos es igual a 2, significa que después de -l no ingresó ningún pid
+        if (argc == 2) {
+            printf("Por favor, ingresa al menos un PID después de -l.\n");
+            return -1;
+        }
+
+        // Si hasta este punto no hemos salido del programa, entonces significa que los argumentos están correctamente escritos
+        // Procesamos todos los PIDs que vienen después de -l
+        // Iniciamos en 2 ya que el arg[0] es el mismo comando, arg[1] es -l 
+        for (int i = 2; i < argc; i++) {
+            //Guardamos la información del proceso en la cola queue
+            storeProcessInfo(argv[i], queue);
+        }
+    } else {
+        // Si no se pasa -l pero hay varios pids, mostramos un mensaje
+        if (argc > 2) {
+            printf("Si desea imprimir la información de varios PIDs, agrega el parámetro -l.\n");
+            printf("Ejemplo: psinfo -l 123 456\n");
+            return -1;
+        }
+
+        // Si no se pasa -l procesamos un solo pid
+        storeProcessInfo(argv[1], queue);
+    }
+
+    return 0;
+}
+
+int main(int argc, char* argv[]){
+    struct Node* queue = NULL;
+    if (processPIDs(argc, argv, &queue) != 0){
+        // Si no retorna 0, es porque hay un error en el código
+        return -1;
+    }
     printProcessQueue(queue);
     return 0;
 }
