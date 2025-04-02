@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "list.h"
 
 int printProcessInfo(char pid[]){
     // Variable para el inicio del comando
