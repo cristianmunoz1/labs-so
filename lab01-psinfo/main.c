@@ -26,8 +26,24 @@ int main(int argc, char* argv[]){
     }
     
     // Fgets ayuda a abrir un pipe del archivo fp y guardar línea por línea en el buffer que definimos anteriormente
-    while(fgets(buffer, sizeof(buffer), fp) != NULL){
-        printf("%s", buffer);
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        if (strncmp("Name:", buffer, 5) == 0) {
+            printf("Nombre del proceso: %s", buffer + 6);
+        } else if (strncmp("State:", buffer, 6) == 0) {
+            printf("Estado del proceso: %s", buffer + 6) ;
+        } else if (strncmp("VmSize:", buffer, 7) == 0) {
+            printf("Tamaño de la imagen de memoria: %s", buffer + 8);
+        } else if (strncmp("VmExe:", buffer, 6) == 0) {
+            printf("Tamaño de la memoria TEXT: %s", buffer + 7);
+        } else if (strncmp("VmData:", buffer, 7) == 0) {
+            printf("Tamaño de la memoria DATA: %s", buffer + 8);
+        } else if (strncmp("VmStk:", buffer, 6) == 0) {
+            printf("Tamaño de la memoria STACK: %s", buffer + 7);
+        } else if (strncmp("voluntary_ctxt_switches:", buffer, 24) == 0) {
+            printf("# de cambios de contexto voluntarios: %s", buffer + 25);
+        } else if (strncmp("nonvoluntary_ctxt_switches:", buffer, 27) == 0) {
+            printf("# de cambios de contexto no voluntarios: %s", buffer + 28);
+        }
     }
     
     // Se cierra el pipe para ahorrar recursos. 
