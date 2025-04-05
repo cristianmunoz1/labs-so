@@ -1,0 +1,9 @@
+Nombre del proceso: postgres
+Estado del proceso: S (sleeping)
+Tamaño de la imagen de memoria:   221124 kB
+Tamaño de la memoria DATA:     1648 kB
+Tamaño de la memoria STACK:      132 kB
+Tamaño de la memoria TEXT:     5716 kB
+# de cambios de contexto voluntarios: 3547
+# de cambios de contexto no voluntarios: 105
+

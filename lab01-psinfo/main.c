@@ -115,6 +115,41 @@ int processPIDs(int argc, char* argv[], struct Node** queue){
     return 0;
 }
 
+int firstProcessPosition(int argc, char* argv[]){
+    for (int i = 1; i<argc; i++){
+        if(!((strcmp(argv[i], "-l") == 0) || (strcmp(argv[i], "-r") == 0))){
+            printf("La posición del primer argumento proceso es: %d\n", i);
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+void writeReport(int argc, char* argv[], struct Node* head, int firstProcessPosition){
+    FILE *report;
+    char nombre_archivo[128] = "psinfo-report-";
+    struct Node* temp = head;
+
+    for (int i = firstProcessPosition; i<argc; i++){
+        if (i!=argc-1){
+            strcat(nombre_archivo, argv[i]);
+            strcat(nombre_archivo, "-");
+        } else {
+            strcat(nombre_archivo, argv[i]);
+            strcat(nombre_archivo, ".info");
+        }
+    }
+
+    report = fopen(nombre_archivo, "w");
+    while (temp != NULL){
+        fprintf(report, "%s\n", temp->data);
+        temp = temp->next;
+    }
+
+}
+
 int main(int argc, char* argv[]){
     struct Node* queue = NULL;
     if (processPIDs(argc, argv, &queue) != 0){
@@ -122,6 +157,7 @@ int main(int argc, char* argv[]){
         return -1;
     }
     printProcessQueue(queue);
+    writeReport(argc, argv, queue, firstProcessPosition(argc, argv));
     return 0;
 }
 
