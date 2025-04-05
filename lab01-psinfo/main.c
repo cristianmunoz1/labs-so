@@ -3,7 +3,8 @@
 #include <string.h>
 #include "list.h"
 
-
+void writeReport(int argc, char* argv[], struct Node* head, int firstProcessPosition);
+int firstProcessPosition(int argc, char* argv[]);
 int storeProcessInfo(char pid[], struct Node** queue){
     // Variable para el inicio del comando
     char inicio_comando[50] = "cat /proc/";
@@ -78,8 +79,15 @@ void printProcessQueue(struct Node* head){
 }
 
 // Función para validar que se pase el -l como parámetro cuando se ingresen varios pids
-int processPIDs(int argc, char* argv[], struct Node** queue){
-    
+int processPIDs(int argc, char* argv[], struct Node** queue, int *hasR, int *hasL){
+      
+    for(int i = 1; i<argc; i++){
+        if(strcmp(argv[i], "-l") == 0){
+            *hasL = 1;
+        } else if(strcmp(argv[i], "-r") == 0) {
+            *hasR = 1;
+        }
+    }
     //Si pasa solo un argumento significa que no pasó ningún pid, por lo que se le advierte al usuario
     if (argc < 2){
         printf("Por favor, ingresa al menos un Process id. \n");
@@ -110,6 +118,10 @@ int processPIDs(int argc, char* argv[], struct Node** queue){
 
         // Si no se pasa -l procesamos un solo pid
         storeProcessInfo(argv[1], queue);
+    }
+
+    if (*hasR == 1){
+        writeReport(argc, argv, *queue, firstProcessPosition(argc, argv));
     }
 
     return 0;
@@ -151,13 +163,19 @@ void writeReport(int argc, char* argv[], struct Node* head, int firstProcessPosi
 }
 
 int main(int argc, char* argv[]){
+    //Declaración de variables necesarias
+    //Son 1 si en los argumentos está la flag r o l
+    int hasL = 0;
+    int hasR = 0;
+    //Cola donde se va a almacenar la info de los procesos.  
     struct Node* queue = NULL;
-    if (processPIDs(argc, argv, &queue) != 0){
+    if (processPIDs(argc, argv, &queue, &hasR, &hasL) != 0){
         // Si no retorna 0, es porque hay un error en el código
         return -1;
     }
+    printf("hasR %d", hasR);
+    printf("hasL %d", hasL);
     printProcessQueue(queue);
-    writeReport(argc, argv, queue, firstProcessPosition(argc, argv));
     return 0;
 }
 
