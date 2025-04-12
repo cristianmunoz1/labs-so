@@ -1,3 +1,5 @@
+//Librería que contiene el método para validar si un caracter es dígito o no
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,28 +7,33 @@
 
 void writeReport(int argc, char* argv[], struct Node* head, int firstProcessPosition);
 int firstProcessPosition(int argc, char* argv[]);
+
+//Definición de función para saber si un dato es numérico, con esta se validarán que los pids sean correctos
+int isNumeric(const char *str){
+    for(int i = 0; str[i]; i++){
+        if(!isdigit(str[i])){
+            return 0;
+        }
+    }
+    return 1;
+}
+
 int storeProcessInfo(char pid[], struct Node** queue){
-    // Variable para el inicio del comando
-    char inicio_comando[50] = "cat /proc/";
-    // Concatenamos el inicio del comando con el primer argumento, que sería el pid
-    strcat(inicio_comando, pid);
-    // Concatenamos con /status para que el programa imprima la información de estado del proceso
-    // El comando queda como: cat /proc/123/status
-    // Siendo 123 un ejemplo de pid
-    strcat(inicio_comando, "/status");
+    char path[64];
+    snprintf(path, sizeof(path), "/proc/%s/status", pid);
     // Declaramos un buffer para leer cada línea del archivo que retorne la función popen. 128 porque es lo máximo que ocupa una línea. 
     char buffer[128];
     //Buffer que almacenará toda la información necesaria de un proceso y la pasará a la data de un nuevo nodo
     char bufferInfo[2048] = "";
 
     //Abrimos un flujo de archivo para abrir el pipe en modo lectura en el cual guardaremos la información de la salida del comando. 
-    FILE *fp = popen(inicio_comando, "r");
+    FILE *fp = fopen(path, "r"); 
 
     //Si fp es nulo, osea que no se pudo ejecutar el comando o que el comando no retornó nada
     if (fp == NULL) {
-        perror("Comando popen falló, intente de nuevo");
-        // Retorna 1 para salir
-        return 1;
+        snprintf(bufferInfo, sizeof(bufferInfo), "El proceso con pid %s no existe o fue terminado\n", pid);
+        insertAtEnd(queue, bufferInfo);
+        return -1;
     }
     // Fgets ayuda a abrir un pipe del archivo fp y guardar línea por línea en el buffer que definimos anteriormente
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {        
@@ -56,9 +63,9 @@ int storeProcessInfo(char pid[], struct Node** queue){
             strcat(bufferInfo, buffer + 28);
         } 
     }
-
+    
+    fclose(fp);
     insertAtEnd(queue, bufferInfo);
-    pclose(fp);
     return 0;
 }
 
@@ -79,49 +86,62 @@ void printProcessQueue(struct Node* head){
 }
 
 // Función para validar que se pase el -l como parámetro cuando se ingresen varios pids
-int processPIDs(int argc, char* argv[], struct Node** queue, int *hasR, int *hasL){
-      
-    for(int i = 1; i<argc; i++){
-        if(strcmp(argv[i], "-l") == 0){
-            *hasL = 1;
-        } else if(strcmp(argv[i], "-r") == 0) {
-            *hasR = 1;
-        }
-    }
-    //Si pasa solo un argumento significa que no pasó ningún pid, por lo que se le advierte al usuario
-    if (argc < 2){
-        printf("Por favor, ingresa al menos un Process id. \n");
+int processPIDs(int argc, char* argv[], struct Node** queue, int *hasR, int *hasL) {
+    if (argc < 2) {
+        printf("Uso: psinfo [ -l pid1 pid2 ... ] [ -r ]\n");
+        return -1;
     }
 
-    // si el primer argumento coincide con -l entonces continuamos con la lectura de argumentos
-    if (strcmp(argv[1], "-l") == 0) {
-        // Si el nro de argumentos es igual a 2, significa que después de -l no ingresó ningún pid
-        if (argc == 2) {
-            printf("Por favor, ingresa al menos un PID después de -l.\n");
+    int i = 1;
+    if (strcmp(argv[i], "-l") == 0) {
+        *hasL = 1;
+        i++;
+
+        if (i >= argc || strcmp(argv[i], "-r") == 0) {
+            printf("Error: Debe ingresar al menos un PID después de -l.\n");
             return -1;
         }
 
-        // Si hasta este punto no hemos salido del programa, entonces significa que los argumentos están correctamente escritos
-        // Procesamos todos los PIDs que vienen después de -l
-        // Iniciamos en 2 ya que el arg[0] es el mismo comando, arg[1] es -l 
-        for (int i = 2; i < argc; i++) {
-            //Guardamos la información del proceso en la cola queue
+        // Leer PIDs múltiples
+        while (i < argc && strcmp(argv[i], "-r") != 0) {
+            if (!isNumeric(argv[i])) {
+                printf("Error: PID '%s' no es válido. Debe ser numérico.\n", argv[i]);
+                return -1;
+            }
             storeProcessInfo(argv[i], queue);
+            i++;
         }
+
+        if (i < argc && strcmp(argv[i], "-r") == 0) {
+            *hasR = 1;
+            if (i != argc - 1) {
+                printf("Error: La bandera -r debe estar al final del comando.\n");
+                return -1;
+            }
+        }
+
     } else {
-        // Si no se pasa -l pero hay varios pids, mostramos un mensaje
-        if (argc > 2) {
-            printf("Si desea imprimir la información de varios PIDs, agrega el parámetro -l.\n");
-            printf("Ejemplo: psinfo -l 123 456\n");
+        // Modo sin -l (1 solo PID)
+        if (!isNumeric(argv[i])) {
+            printf("Error: PID '%s' no es válido. Debe ser numérico.\n", argv[i]);
             return -1;
         }
 
-        // Si no se pasa -l procesamos un solo pid
-        storeProcessInfo(argv[1], queue);
-    }
+        storeProcessInfo(argv[i], queue);
+        i++;
 
-    if (*hasR == 1){
-        writeReport(argc, argv, *queue, firstProcessPosition(argc, argv));
+        if (i < argc) {
+            if (strcmp(argv[i], "-r") == 0) {
+                *hasR = 1;
+                if (i != argc - 1) {
+                    printf("Error: La bandera -r debe estar al final del comando.\n");
+                    return -1;
+                }
+            } else {
+                printf("Error: Argumento no reconocido: %s\n", argv[i]);
+                return -1;
+            }
+        }
     }
 
     return 0;
@@ -144,15 +164,27 @@ void writeReport(int argc, char* argv[], struct Node* head, int firstProcessPosi
     char nombre_archivo[128] = "psinfo-report-";
     struct Node* temp = head;
 
-    for (int i = firstProcessPosition; i<argc; i++){
-        if (i!=argc-1){
-            strcat(nombre_archivo, argv[i]);
-            strcat(nombre_archivo, "-");
-        } else {
-            strcat(nombre_archivo, argv[i]);
-            strcat(nombre_archivo, ".info");
-        }
+    for (int i = firstProcessPosition; i < argc; i++) {
+    // Ignorar banderas como -l o -r
+    if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "-l") == 0) {
+        continue;
     }
+
+    strcat(nombre_archivo, argv[i]);
+
+    // Solo añadir '-' si no es el último PID (verificamos si hay más PIDs adelante)
+    int j = i + 1;
+    while (j < argc && (strcmp(argv[j], "-r") == 0 || strcmp(argv[j], "-l") == 0)){
+        j++;
+    }
+
+    if (j < argc) {
+        strcat(nombre_archivo, "-");
+    } else {
+        strcat(nombre_archivo, ".info");
+        break;
+    }
+}
 
     report = fopen(nombre_archivo, "w");
     while (temp != NULL){
@@ -162,19 +194,20 @@ void writeReport(int argc, char* argv[], struct Node* head, int firstProcessPosi
 
 }
 
-int main(int argc, char* argv[]){
-    //Declaración de variables necesarias
-    //Son 1 si en los argumentos está la flag r o l
+int main(int argc, char* argv[]) {
     int hasL = 0;
     int hasR = 0;
-    //Cola donde se va a almacenar la info de los procesos.  
     struct Node* queue = NULL;
-    if (processPIDs(argc, argv, &queue, &hasR, &hasL) != 0){
-        // Si no retorna 0, es porque hay un error en el código
+
+    if (processPIDs(argc, argv, &queue, &hasR, &hasL) != 0) {
         return -1;
     }
-    printf("hasR %d", hasR);
-    printf("hasL %d", hasL);
+
+    if (hasR) {
+        int pos = firstProcessPosition(argc, argv);
+        writeReport(argc, argv, queue, pos);
+    }
+
     printProcessQueue(queue);
     return 0;
 }
