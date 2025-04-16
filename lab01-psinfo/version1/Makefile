@@ -19,6 +19,13 @@ list.o: list.c list.h
 functions.o: functions.c functions.h list.c list.h
 	gcc -c functions.c
 
+# Cuando se haga make install se puede ejecutar el programa como un comando global de la terminal
+install:
+	# Creamos la carpeta que contendrá el ejecutable en el PATH
+	mkdir -p $(HOME)/.local/bin
+	# Copiamos el ejecutable a la carpeta para que esté disponible cuando se llame
+	cp psinfo $(HOME)/.local/bin/
+
 # Regla para instalar la man page comprimida en man1
 # make install-man
 install-man:
@@ -32,4 +39,4 @@ install-man:
 # Limpiar archivos generados
 clean:
 	rm -f *.o psinfo *.info psinfo.1.gz
-
+	rm -f $(HOME)/.local/bin/psinfo
