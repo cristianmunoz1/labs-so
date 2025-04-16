@@ -1,5 +1,9 @@
 # Primer directorio en el MANPATH del sistema
+# Con cut cortamos la salida del comando manpath que es el que necesitamos para extraer la dirección de las man pages del usuario
+# Con -d cambiamos el delimitador por defecto para el corte que es el tab por los :
+# -f1 es para que tomemos la primera parte que se cortó de la salida del comando manpath para guardar allí el zip
 MANDIR := $(shell manpath | cut -d: -f1)
+# Guardamos la man page en la sección 1
 MANSECTION := 1
 
 # Reglas de compilación
@@ -16,9 +20,13 @@ functions.o: functions.c functions.h list.c list.h
 	gcc -c functions.c
 
 # Regla para instalar la man page comprimida en man1
+# make install-man
 install-man:
+	#Comprimimos el archivo psinfo.1 donde se creó toda la documentación del comando psinfo
 	gzip -c psinfo.1 > psinfo.1.gz
+	#Creamos en la dirección que extraímos de las man pages un directorio donde contendrá las man pages de la sección 1, man1
 	mkdir -p $(MANDIR)/man$(MANSECTION)
+	#Copiamos dentro del directorio que creamos el comprimido
 	cp psinfo.1.gz $(MANDIR)/man$(MANSECTION)/psinfo.1.gz
 
 # Limpiar archivos generados
