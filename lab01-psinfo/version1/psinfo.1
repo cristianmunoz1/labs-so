@@ -1,0 +1,27 @@
+.TH PSINFO 1
+.P
+
+Psinfo is a program that allows you to extract information about one or more processes running in your CPU only with the Process id. 
+
+Use:
+    psinfo [pid]
+
+    Example: let 123 be a process id. 
+        psinfo 123
+
+
+    Flags: 
+        -l 
+            This flag allow you to extract information about one or more processes passing multiple pids to the command.
+            Only use -l in the first position of the arguments. Otherwise an error will be raised. 
+            
+            psinfo -l [pid1] [pid2] ... [pidn]
+
+        -r 
+            This flag tells to psinfo that after extract the information of the processes, create a .info file with the command output. 
+            Only use -r in the last position of the command arguments. Otherwise, the command will not return information. 
+
+            pinfo -l [pid1] [pid2] ... [pidn] -r
+
+            It will generate a file named psinfo-report-pid1-...pidn.info
+            
