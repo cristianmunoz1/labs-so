@@ -34,29 +34,21 @@ int storeProcessInfo(char pid[], struct Node** queue){
     // Fgets ayuda a abrir un pipe del archivo fp y guardar línea por línea en el buffer que definimos anteriormente
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {        
         if (strncmp("Name:", buffer, 5) == 0) {
-            strcat(bufferInfo, "Nombre del proceso: ");
-            strcat(bufferInfo, buffer + 6);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "Nombre del proceso: ", buffer+6);
         } else if (strncmp("State:", buffer, 6) == 0) {
-            strcat(bufferInfo, "Estado del proceso: ");
-            strcat(bufferInfo, buffer + 7);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "Estado del proceso: ", buffer+7);
         } else if (strncmp("VmSize:", buffer, 7) == 0) {
-            strcat(bufferInfo, "Tamaño de la imagen de memoria: ");
-            strcat(bufferInfo, buffer + 8);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "Tamaño de la imagen de memoria: ", buffer+8);
         } else if (strncmp("VmExe:", buffer, 6) == 0) {
-            strcat(bufferInfo, "Tamaño de la memoria TEXT: ");
-            strcat(bufferInfo, buffer + 7);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "Tamaño de la memoria TEXT: ", buffer+8);
         } else if (strncmp("VmData:", buffer, 7) == 0) {
-            strcat(bufferInfo, "Tamaño de la memoria DATA: ");
-            strcat(bufferInfo, buffer + 8);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "Tamaño de la memoria DATA: ", buffer+8);
         } else if (strncmp("VmStk:", buffer, 6) == 0) {
-            strcat(bufferInfo, "Tamaño de la memoria STACK: ");
-            strcat(bufferInfo, buffer + 7);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "Tamaño de la memoria STACK: ", buffer+7);
         } else if (strncmp("voluntary_ctxt_switches:", buffer, 24) == 0) {
-            strcat(bufferInfo, "# de cambios de contexto voluntarios: ");
-            strcat(bufferInfo, buffer + 25);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "# de cambios de contexto Voluntarios: ", buffer+25);
         } else if (strncmp("nonvoluntary_ctxt_switches:", buffer, 27) == 0) {
-            strcat(bufferInfo, "# de cambios de contexto no voluntarios: ");
-            strcat(bufferInfo, buffer + 28);
+            snprintf(bufferInfo + strlen(bufferInfo), sizeof(bufferInfo) - strlen(bufferInfo), "%s%s", "# de cambios de contexto No Voluntarios: ", buffer+28);
         } 
     }
     
