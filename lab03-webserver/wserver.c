@@ -11,8 +11,11 @@ int main(int argc, char *argv[]) {
     int c;
     char *root_dir = default_root;
     int port = 10000;
+    int threads = 1; // 1 thread by default
+    int buffers = 1; //1 request at a time by default
+    char* schedalg = "FIFO";
     
-    while ((c = getopt(argc, argv, "d:p:")) != -1)
+    while ((c = getopt(argc, argv, "d:p:t:b:s:")) != -1)
 	switch (c) {
 	case 'd':
 	    root_dir = optarg;
@@ -20,9 +23,25 @@ int main(int argc, char *argv[]) {
 	case 'p':
 	    port = atoi(optarg);
 	    break;
-	default:
-	    fprintf(stderr, "usage: wserver [-d basedir] [-p port]\n");
+    case 't':
+        threads = atoi(optarg);
+        break;
+    case 'b':
+      buffers = atoi(optarg);
+      break;
+    case 's':
+      if(strcmp("FIFO", optarg)==0){
+        schedalg = "FIFO"; 
+    } else if (strcmp("SFF", optarg)==0){
+        schedalg = "SFF";
+    }else{
+        fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] [-s FIFO or SFF]\n");
 	    exit(1);
+    }
+      break;
+	default:
+	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] [-s FIFO or SFF]\n");
+        exit(1);
 	}
 
     // run out of this directory
