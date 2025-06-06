@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "request.h"
 #include "io_helper.h"
+#include <pthread.h>
 
 char default_root[] = ".";
 
@@ -29,17 +30,7 @@ int main(int argc, char *argv[]) {
     case 'b':
       buffers = atoi(optarg);
       break;
-    case 's':
-      if(strcmp("FIFO", optarg)==0){
-        schedalg = "FIFO"; 
-    } else if (strcmp("SFF", optarg)==0){
-        schedalg = "SFF";
-    }else{
-        fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] [-s FIFO or SFF]\n");
-	    exit(1);
-    }
-      break;
-	default:
+    default:
 	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] [-s FIFO or SFF]\n");
         exit(1);
 	}
