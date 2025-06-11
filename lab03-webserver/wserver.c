@@ -8,9 +8,21 @@ char default_root[] = ".";
 //
 // ./wserver [-d <basedir>] [-p <portnum>] 
 //
+//
+double get_seconds() {
+    struct timeval t;
+    int rc = gettimeofday(&t, NULL);
+    assert(rc == 0);
+    return (double) ((double)t.tv_sec + (double)t.tv_usec / 1e6);
+}
+
 void* consumer_function(void* arg){
     while(1){
         int conn_fd = buffer_remove(&request_buffer);
+        double t1 = get_seconds();
+        while((get_seconds() - t1 ) < 3){
+            sleep(1);
+        }
         request_handle(conn_fd);
         close_or_die(conn_fd);
     }
