@@ -5,7 +5,6 @@
 #include "buffer.h"
 
 char default_root[] = ".";
-
 //
 // ./wserver [-d <basedir>] [-p <portnum>] 
 //
