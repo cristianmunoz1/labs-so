@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     int buffers = 1; //1 request at a time by default
     char* schedalg = "FIFO";
     
-    while ((c = getopt(argc, argv, "d:p:t:b:s:")) != -1)
+    while ((c = getopt(argc, argv, "d:p:t:b:")) != -1)
 	switch (c) {
 	case 'd':
 	    root_dir = optarg;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
       buffers = atoi(optarg);
       break;
     default:
-	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] [-s FIFO or SFF]\n");
+	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] \n");
         exit(1);
 	}
     
