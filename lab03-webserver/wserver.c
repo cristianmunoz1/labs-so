@@ -5,13 +5,24 @@
 #include "buffer.h"
 
 char default_root[] = ".";
-
 //
 // ./wserver [-d <basedir>] [-p <portnum>] 
 //
+//
+double get_seconds() {
+    struct timeval t;
+    int rc = gettimeofday(&t, NULL);
+    assert(rc == 0);
+    return (double) ((double)t.tv_sec + (double)t.tv_usec / 1e6);
+}
+
 void* consumer_function(void* arg){
     while(1){
         int conn_fd = buffer_remove(&request_buffer);
+        double t1 = get_seconds();
+        while((get_seconds() - t1 ) < 3){
+            sleep(1);
+        }
         request_handle(conn_fd);
         close_or_die(conn_fd);
     }
@@ -26,7 +37,7 @@ int main(int argc, char *argv[]) {
     int buffers = 1; //1 request at a time by default
     char* schedalg = "FIFO";
     
-    while ((c = getopt(argc, argv, "d:p:t:b:s:")) != -1)
+    while ((c = getopt(argc, argv, "d:p:t:b:")) != -1)
 	switch (c) {
 	case 'd':
 	    root_dir = optarg;
@@ -41,7 +52,7 @@ int main(int argc, char *argv[]) {
       buffers = atoi(optarg);
       break;
     default:
-	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] [-s FIFO or SFF]\n");
+	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t number of threads] [-b buffers] \n");
         exit(1);
 	}
     
